@@ -1,0 +1,48 @@
+import numpy as np
+from scipy.stats import multivariate_normal
+
+def expectation_maximization(data, num_clusters, num_iterations=100):
+    # Initialization
+    num_samples, num_features = data.shape
+    weights = np.ones((num_clusters,)) / num_clusters
+    means = data[np.random.choice(num_samples, num_clusters, replace=False)]
+    covariances = np.tile(np.eye(num_features), (num_clusters, 1, 1))
+
+    for iteration in range(num_iterations):
+        # Expectation step
+        responsibilities = np.zeros((num_samples, num_clusters))
+        for cluster in range(num_clusters):
+            responsibilities[:, cluster] = weights[cluster] * multivariate_normal.pdf(data, means[cluster], covariances[cluster])
+
+        responsibilities /= responsibilities.sum(axis=1, keepdims=True)
+
+        # Maximization step
+        N_k = responsibilities.sum(axis=0)
+        weights = N_k / num_samples
+        means = (responsibilities.T @ data) / N_k[:, np.newaxis]
+
+        for cluster in range(num_clusters):
+            diff = data - means[cluster]
+            covariances[cluster] = (responsibilities[:, cluster, np.newaxis, np.newaxis] * diff[:, :, np.newaxis] @ diff[:, np.newaxis, :]).sum(axis=0) / N_k[cluster]
+
+    return weights, means, covariances
+
+if __name__ == "__main__":
+    # Generate synthetic data for illustration
+    np.random.seed(42)
+    data1 = np.random.multivariate_normal(mean=[2, 2], cov=[[1, 0.5], [0.5, 1]], size=100)
+    data2 = np.random.multivariate_normal(mean=[6, 6], cov=[[1, -0.5], [-0.5, 1]], size=100)
+    data = np.vstack([data1, data2])
+
+    # Number of clusters
+    num_clusters = 2
+
+    # Run EM algorithm
+    weights, means, covariances = expectation_maximization(data, num_clusters)
+
+    print("Weights:")
+    print(weights)
+    print("\nMeans:")
+    print(means)
+    print("\nCovariances:")
+    print(covariances)
