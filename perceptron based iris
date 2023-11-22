@@ -1,0 +1,66 @@
+# Import necessary libraries
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import accuracy_score
+
+# Load the Iris dataset
+iris = load_iris()
+X = iris.data[:100, :2]  # Using only the first two features for simplicity
+y = (iris.target[:100] != 0) * 1  # Convert the problem into a binary classification task (setosa vs. non-setosa)
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Standardize the features
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# Perceptron class
+class Perceptron:
+    def __init__(self, learning_rate=0.01, n_iterations=1000):
+        self.learning_rate = learning_rate
+        self.n_iterations = n_iterations
+        self.weights = None
+        self.bias = None
+
+    def fit(self, X, y):
+        # Initialize weights and bias
+        self.weights = np.zeros(X.shape[1])
+        self.bias = 0
+
+        for _ in range(self.n_iterations):
+            for xi, yi in zip(X, y):
+                update = self.learning_rate * (yi - self.predict(xi))
+                self.weights += update * xi
+                self.bias += update
+
+    def predict(self, X):
+        return np.dot(X, self.weights) + self.bias
+
+# Train the perceptron
+perceptron = Perceptron(learning_rate=0.1, n_iterations=1000)
+perceptron.fit(X_train, y_train)
+
+# Make predictions
+y_pred_train = np.sign(perceptron.predict(X_train))
+y_pred_test = np.sign(perceptron.predict(X_test))
+
+# Evaluate the model
+accuracy_train = accuracy_score(y_train, y_pred_train)
+accuracy_test = accuracy_score(y_test, y_pred_test)
+
+print(f'Accuracy on Training Set: {accuracy_train}')
+print(f'Accuracy on Testing Set: {accuracy_test}')
+
+# Visualize the decision boundary
+plt.scatter(X_test[:, 0], X_test[:, 1], c=y_test, cmap='viridis', marker='o', label='Actual')
+plt.scatter(X_test[:, 0], X_test[:, 1], c=y_pred_test, cmap='viridis', marker='x', s=80, linewidths=1, label='Predicted')
+plt.xlabel('Feature 1')
+plt.ylabel('Feature 2')
+plt.title('Perceptron Decision Boundary')
+plt.legend()
+plt.show()
