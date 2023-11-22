@@ -1,0 +1,34 @@
+# Import necessary libraries
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_absolute_error
+
+# Load your dataset (replace 'your_dataset.csv' with the actual file name)
+# Make sure your dataset includes features and a target variable (price)
+data = pd.read_csv('your_dataset.csv')
+
+# Explore the dataset
+print(data.head())
+
+# Prepare the data
+X = data.drop('price', axis=1)  # Features
+y = data['price']  # Target variable
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Create and train the model (Random Forest Regressor in this example)
+model = RandomForestRegressor(random_state=42)
+model.fit(X_train, y_train)
+
+# Make predictions
+y_pred_train = model.predict(X_train)
+y_pred_test = model.predict(X_test)
+
+# Evaluate the model
+mae_train = mean_absolute_error(y_train, y_pred_train)
+mae_test = mean_absolute_error(y_test, y_pred_test)
+
+print(f'Mean Absolute Error on Training Set: {mae_train}')
+print(f'Mean Absolute Error on Testing Set: {mae_test}')
