@@ -1,0 +1,46 @@
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
+
+# Generate synthetic data
+np.random.seed(42)
+data = pd.DataFrame({
+    'Income': np.random.uniform(20000, 80000, 1000),
+    'Age': np.random.randint(18, 65, 1000),
+    'LoanAmount': np.random.uniform(5000, 50000, 1000),
+    'CreditScore': np.random.randint(300, 850, 1000),
+    'GoodCredit': np.random.choice([0, 1], size=1000)
+})
+
+# Features (X) and target variable (y)
+X = data[['Income', 'Age', 'LoanAmount', 'CreditScore']]
+y = data['GoodCredit']
+
+# Split the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Standardize features (optional but often recommended for logistic regression)
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# Create and train the Logistic Regression classifier
+logistic_regression_classifier = LogisticRegression(random_state=42)
+logistic_regression_classifier.fit(X_train_scaled, y_train)
+
+# Make predictions on the test set
+y_pred = logistic_regression_classifier.predict(X_test_scaled)
+
+# Evaluate the model
+accuracy = accuracy_score(y_test, y_pred)
+conf_matrix = confusion_matrix(y_test, y_pred)
+classification_report_str = classification_report(y_test, y_pred)
+
+print("Accuracy:", accuracy)
+print("\nConfusion Matrix:")
+print(conf_matrix)
+print("\nClassification Report:")
+print(classification_report_str)
