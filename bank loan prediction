@@ -1,0 +1,47 @@
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from sklearn.preprocessing import LabelEncoder
+
+# Load the dataset (replace 'your_dataset.csv' with the actual file name)
+# Make sure your dataset includes features and a target variable ('Loan_Status')
+data = pd.read_csv('your_dataset.csv')
+
+# Explore the dataset
+print(data.head())
+
+# Encode categorical variables if needed
+label_encoder = LabelEncoder()
+for column in data.select_dtypes(include=['object']).columns:
+    data[column] = label_encoder.fit_transform(data[column])
+
+# Prepare the data
+X = data.drop('Loan_Status', axis=1)
+y = data['Loan_Status']
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Create and train the Gaussian Naive Bayes model
+model = GaussianNB()
+model.fit(X_train, y_train)
+
+# Make predictions
+y_pred_train = model.predict(X_train)
+y_pred_test = model.predict(X_test)
+
+# Evaluate the model
+accuracy_train = accuracy_score(y_train, y_pred_train)
+accuracy_test = accuracy_score(y_test, y_pred_test)
+
+print(f'Accuracy on Training Set: {accuracy_train}')
+print(f'Accuracy on Testing Set: {accuracy_test}')
+
+# Additional evaluation metrics
+conf_matrix = confusion_matrix(y_test, y_pred_test)
+class_report = classification_report(y_test, y_pred_test)
+
+print(f'Confusion Matrix:\n{conf_matrix}')
+print(f'Classification Report:\n{class_report}')
